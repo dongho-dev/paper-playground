@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transformer Paper Interactive</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark">T</span>
+          <span>Transformer Lens</span>
+        </div>
+        <nav class="tabs" aria-label="Scenes">
+          <button class="tab is-active" data-scene="attention">Attention</button>
+          <button class="tab" data-scene="heads">Heads</button>
+          <button class="tab" data-scene="encoder">Encoder</button>
+        </nav>
+      </header>
+
+      <section class="workspace">
+        <aside class="control-panel" aria-label="Controls">
+          <label class="field">
+            <span>Input</span>
+            <textarea id="sequenceInput" rows="4" spellcheck="false">the cat sat on the mat</textarea>
+          </label>
+
+          <div class="field">
+            <span>Head</span>
+            <div class="segmented" id="headButtons" role="group" aria-label="Attention head"></div>
+          </div>
+
+          <label class="field">
+            <span>Sharpness</span>
+            <input id="temperatureInput" type="range" min="40" max="180" value="100" />
+          </label>
+
+          <div class="field">
+            <span>Query token</span>
+            <div class="token-list" id="tokenList"></div>
+          </div>
+        </aside>
+
+        <section class="scene-panel">
+          <section class="scene is-active" id="scene-attention" aria-label="Attention scene">
+            <div class="scene-header">
+              <div>
+                <h1>Scaled Dot-Product Attention</h1>
+                <p class="formula">Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V</p>
+              </div>
+              <div class="pill" id="selectedTokenLabel"></div>
+            </div>
+
+            <div class="attention-layout">
+              <div class="matrix-wrap">
+                <div class="axis-label">keys</div>
+                <div class="matrix" id="attentionMatrix"></div>
+                <div class="axis-label vertical">queries</div>
+              </div>
+
+              <div class="vector-panel">
+                <h2>Q / K / V</h2>
+                <div class="vector-stack" id="vectorStack"></div>
+              </div>
+            </div>
+
+            <div class="output-strip" id="weightedOutput"></div>
+          </section>
+
+          <section class="scene" id="scene-heads" aria-label="Multi-head scene">
+            <div class="scene-header">
+              <div>
+                <h1>Multi-Head Comparison</h1>
+                <p class="formula">Different projections expose different token relationships.</p>
+              </div>
+            </div>
+            <div class="heads-grid" id="headsGrid"></div>
+          </section>
+
+          <section class="scene" id="scene-encoder" aria-label="Encoder scene">
+            <div class="scene-header">
+              <div>
+                <h1>Encoder Layer Flow</h1>
+                <p class="formula">Embedding + position -> attention -> residual -> feed-forward</p>
+              </div>
+            </div>
+            <div class="flow" id="encoderFlow"></div>
+          </section>
+        </section>
+
+        <aside class="inspector-panel" aria-label="Inspector">
+          <section class="inspector-section">
+            <h2>Current Signal</h2>
+            <dl class="metrics" id="metrics"></dl>
+          </section>
+          <section class="inspector-section">
+            <h2>Top Links</h2>
+            <ol class="rank-list" id="topLinks"></ol>
+          </section>
+          <section class="inspector-section">
+            <h2>Paper Anchor</h2>
+            <p>
+              The app starts from section 3.2.1 of the Transformer paper:
+              scaled dot-product attention.
+            </p>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+
