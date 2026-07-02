@@ -2,9 +2,9 @@
 
 ## Goal
 
-Build a private, version-controlled learning workspace for understanding
-"Attention Is All You Need" through a dark, ordered, kid-friendly interactive
-web dashboard with concrete numbers from the paper.
+Build `Paper Playground 001`: a public, version-controlled experiment that turns
+the Self-Attention mechanism from `Attention Is All You Need` into a Korean
+interactive learning object.
 
 ## User
 
@@ -14,22 +14,22 @@ the real paper variables.
 
 ## Product Direction
 
-The first usable version remains static and local-first, but the learning path
-should follow the paper:
+The product direction is not "paper summary". It is "paper mechanism as
+interactive lesson".
 
-1. Motivation and path length.
-2. Token count and token-pair count.
-3. Positional encodings.
-4. One query token, raw scores, scaling, and softmax.
+The first usable version remains static and local-first, but the proof should
+focus on the Self-Attention mechanism:
+
+1. Q/K/V and token relationships.
+2. Attention score matrix.
+3. `sqrt(d_k)` scaling.
+4. Softmax heatmap.
 5. Multi-head comparison.
-6. Decoder masking and encoder-decoder cross-attention.
-7. Encoder-decoder architecture.
-8. Feed-forward, residual, and layer normalization.
-9. Training schedule and headline results.
+6. Weighted-sum intuition.
 
 ## Current Implementation
 
-- `index.html` defines the paper-ordered dashboard sections.
+- `index.html` defines the Paper Playground 001 app and paper-ordered sections.
 - `styles.css` implements a responsive, dense learning dashboard.
 - `app.js` runs a deterministic 8-dimensional toy simulation so learners can
   inspect exact numbers without a backend or model weights.
@@ -43,6 +43,7 @@ should follow the paper:
   simplified math stays anchored to real values.
 - Decoder cross-attention uses a separate editable target draft and shows
   target-to-source attention weights.
+- `SPEC.md` captures the product thesis and the narrower Self-Attention MVP.
 
 ## Success Criteria
 
@@ -54,7 +55,10 @@ should follow the paper:
 - Clicking a token changes the selected query row.
 - Switching heads changes attention behavior.
 - Scaling and masking toggles visibly change score/weight behavior.
-- The dashboard presents the paper in order, not as disconnected widgets.
+- The playground makes the core Self-Attention mechanism easier to understand
+  than a static summary.
+- The broader dashboard keeps paper context available without hiding the
+  playground.
 - The learning path starts with token counts and pair counts before showing
   paper variables like d_model, h, d_k, d_ff, warmup, and BLEU.
 - The dashboard is dark-mode by default.
@@ -65,3 +69,5 @@ should follow the paper:
 
 - The simulation uses deterministic toy vectors, not trained model weights.
 - There is no quiz or progress persistence yet.
+- The current app covers more than Self-Attention; the product proof still needs
+  a tighter Self-Attention-only path.
