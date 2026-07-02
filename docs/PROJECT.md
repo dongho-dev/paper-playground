@@ -22,7 +22,7 @@ should follow the paper:
 3. Token embeddings and positional encodings.
 4. Scaled dot-product attention.
 5. Multi-head comparison.
-6. Decoder masking.
+6. Decoder masking and encoder-decoder cross-attention.
 7. Feed-forward, residual, and layer normalization.
 8. Training schedule and headline results.
 
@@ -34,6 +34,8 @@ should follow the paper:
   inspect exact numbers without a backend or model weights.
 - Paper constants for base/big models are shown beside the toy simulation so the
   simplified math stays anchored to real values.
+- Decoder cross-attention uses a separate editable target draft and shows
+  target-to-source attention weights.
 
 ## Success Criteria
 
@@ -50,7 +52,6 @@ should follow the paper:
 ## Known Limits
 
 - The simulation uses deterministic toy vectors, not trained model weights.
-- Decoder cross-attention is represented conceptually but not yet interactive.
 - There is no quiz or progress persistence yet.
 - A GitHub private remote still needs to be created with an available repo
   creation path or user-provided remote.

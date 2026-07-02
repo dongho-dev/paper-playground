@@ -152,14 +152,29 @@
           <section class="paper-step" id="decoder">
             <div class="step-copy">
               <span class="section-kicker">Section 3.2.3</span>
-              <h2>Decoder self-attention은 미래를 가린다</h2>
+              <h2>Decoder는 미래를 가리고 encoder 출력을 다시 본다</h2>
               <p>
                 autoregressive 생성에서는 현재 위치가 오른쪽의 미래 출력 토큰을 볼 수 없다.
-                마스크를 켜면 attention 점수에서 미래 위치가 제외된다.
+                그 다음 encoder-decoder attention에서 target query가 source sentence의 key/value를 참조한다.
               </p>
             </div>
             <div class="decoder-layout">
-              <div class="mask-matrix" id="maskMatrix"></div>
+              <div class="decoder-column">
+                <label class="field">
+                  <span>Target draft</span>
+                  <textarea id="targetInput" rows="2" spellcheck="false">it was tired</textarea>
+                </label>
+                <div class="field">
+                  <span>Target query token</span>
+                  <div class="token-list" id="targetTokenList"></div>
+                </div>
+                <div class="mask-matrix" id="maskMatrix"></div>
+              </div>
+              <div class="cross-panel">
+                <span class="table-caption">Encoder-decoder attention weights</span>
+                <div class="cross-matrix" id="crossAttentionMatrix"></div>
+                <div class="cross-output" id="crossOutput"></div>
+              </div>
               <div class="decoder-notes" id="decoderNotes"></div>
             </div>
           </section>

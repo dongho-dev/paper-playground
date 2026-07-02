@@ -43,7 +43,9 @@ const colors = ["#0f8b8d", "#df5c4d", "#c89013", "#4b8f55"];
 
 const state = {
   tokens: [],
+  targetTokens: [],
   selectedToken: 0,
+  selectedTarget: 0,
   selectedHead: 0,
   sharpness: 1,
   scale: true,
@@ -53,8 +55,10 @@ const state = {
 
 const el = {
   input: document.querySelector("#sequenceInput"),
+  targetInput: document.querySelector("#targetInput"),
   modelPreset: document.querySelector("#modelPreset"),
   tokenList: document.querySelector("#tokenList"),
+  targetTokenList: document.querySelector("#targetTokenList"),
   headButtons: document.querySelector("#headButtons"),
   sharpness: document.querySelector("#sharpnessInput"),
   scaleToggle: document.querySelector("#scaleToggle"),
@@ -72,6 +76,8 @@ const el = {
   scaleCompare: document.querySelector("#scaleCompare"),
   headsGrid: document.querySelector("#headsGrid"),
   maskMatrix: document.querySelector("#maskMatrix"),
+  crossAttentionMatrix: document.querySelector("#crossAttentionMatrix"),
+  crossOutput: document.querySelector("#crossOutput"),
   decoderNotes: document.querySelector("#decoderNotes"),
   encoderFlow: document.querySelector("#encoderFlow"),
   normPanel: document.querySelector("#normPanel"),
@@ -191,6 +197,21 @@ function computeHead(head, options = {}) {
   return { base, q, k, v, raw, usedScores, weights, output };
 }
 
+function computeCrossHead(head) {
+  const sourceBase = state.tokens.map(vectorForToken);
+  const targetBase = state.targetTokens.map(vectorForToken);
+  const q = targetBase.map((vector) => projection(vector, head + DEMO_HEADS, "q"));
+  const k = sourceBase.map((vector) => projection(vector, head, "k"));
+  const v = sourceBase.map((vector) => projection(vector, head, "v"));
+  const raw = q.map((query) => k.map((key) => dot(query, key)));
+  const usedScores = raw.map((row) =>
+    row.map((score) => (state.scale ? score / Math.sqrt(DEMO_DIM) : score) * state.sharpness),
+  );
+  const weights = usedScores.map(softmax);
+  const output = weights.map((row) => weightedSum(row, v));
+  return { q, k, v, raw, usedScores, weights, output };
+}
+
 function entropy(weights) {
   return weights.reduce((sum, weight) => {
     if (weight <= 0) return sum;
@@ -248,6 +269,21 @@ function renderTokens() {
       render();
     });
     el.tokenList.append(button);
+  });
+}
+
+function renderTargetTokens() {
+  el.targetTokenList.innerHTML = "";
+  state.targetTokens.forEach((token, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `token-chip${index === state.selectedTarget ? " is-selected" : ""}`;
+    button.textContent = token;
+    button.addEventListener("click", () => {
+      state.selectedTarget = index;
+      render();
+    });
+    el.targetTokenList.append(button);
   });
 }
 
@@ -543,28 +579,66 @@ function renderHeads() {
 }
 
 function renderMaskSection() {
-  const count = state.tokens.length;
+  const count = state.targetTokens.length;
   el.maskMatrix.style.gridTemplateColumns = `repeat(${count}, minmax(34px, 1fr))`;
   el.maskMatrix.innerHTML = "";
 
-  state.tokens.forEach((_, queryIndex) => {
-    state.tokens.forEach((__, keyIndex) => {
+  state.targetTokens.forEach((_, queryIndex) => {
+    state.targetTokens.forEach((__, keyIndex) => {
       const allowed = keyIndex <= queryIndex;
       const cell = document.createElement("span");
       cell.className = `mask-cell${allowed ? "" : " blocked"}`;
       cell.textContent = allowed ? "OK" : "--";
-      cell.title = `${state.tokens[queryIndex]} -> ${state.tokens[keyIndex]}`;
+      cell.title = `${state.targetTokens[queryIndex]} -> ${state.targetTokens[keyIndex]}`;
       el.maskMatrix.append(cell);
     });
   });
 
-  const allowedCount = state.selectedToken + 1;
+  const allowedCount = state.selectedTarget + 1;
   const blockedCount = count - allowedCount;
   el.decoderNotes.innerHTML = `
-    <strong>query position ${state.selectedToken}</strong>
-    <p>허용 key: ${allowedCount}개, 차단 key: ${blockedCount}개</p>
-    <p>마스크가 켜지면 미래 위치 score는 -infinity가 되고 softmax weight는 0이 된다.</p>
-    <p>현재 상태: <strong>${state.mask ? "마스크 적용" : "마스크 미적용"}</strong></p>
+    <strong>target query: ${escapeHTML(state.targetTokens[state.selectedTarget])}</strong>
+    <p>Masked self-attention allows ${allowedCount} target key(s) and blocks ${blockedCount} future key(s).</p>
+    <p>Cross-attention then uses this target-side query to read every encoder source token.</p>
+    <p>Global mask toggle: <strong>${state.mask ? "on" : "off"}</strong></p>
+  `;
+}
+
+function renderCrossAttention(data) {
+  const sourceCount = state.tokens.length;
+  el.crossAttentionMatrix.style.gridTemplateColumns = `repeat(${sourceCount}, minmax(48px, 1fr))`;
+  el.crossAttentionMatrix.innerHTML = "";
+
+  data.weights.forEach((row, targetIndex) => {
+    row.forEach((weight, sourceIndex) => {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = `cross-cell${targetIndex === state.selectedTarget ? " is-target" : ""}`;
+      cell.style.background = heatColor(weight, state.selectedHead);
+      cell.textContent = format(weight, 2);
+      cell.title = `${state.targetTokens[targetIndex]} -> ${state.tokens[sourceIndex]}`;
+      cell.addEventListener("click", () => {
+        state.selectedTarget = targetIndex;
+        render();
+      });
+      el.crossAttentionMatrix.append(cell);
+    });
+  });
+
+  const row = data.weights[state.selectedTarget];
+  const best = topIndex(row);
+  const ranked = row
+    .map((weight, index) => ({ weight, token: state.tokens[index] }))
+    .sort((a, b) => b.weight - a.weight)
+    .slice(0, 4)
+    .map((item) => `<span>${escapeHTML(item.token)} ${(item.weight * 100).toFixed(1)}%</span>`)
+    .join("");
+
+  el.crossOutput.innerHTML = `
+    <p><strong>${escapeHTML(state.targetTokens[state.selectedTarget])}</strong> reads source token <strong>${escapeHTML(
+      state.tokens[best],
+    )}</strong> most strongly.</p>
+    <p>${ranked}</p>
   `;
 }
 
@@ -712,7 +786,9 @@ function renderInspector(data) {
 
 function render() {
   state.tokens = tokenize(el.input.value);
+  state.targetTokens = tokenize(el.targetInput.value);
   state.selectedToken = Math.min(state.selectedToken, state.tokens.length - 1);
+  state.selectedTarget = Math.min(state.selectedTarget, state.targetTokens.length - 1);
   state.sharpness = Number(el.sharpness.value) / 100;
   state.scale = el.scaleToggle.checked;
   state.mask = el.maskToggle.checked;
@@ -720,9 +796,11 @@ function render() {
 
   const preset = PAPER_PRESETS[state.preset];
   const data = computeHead(state.selectedHead);
+  const crossData = computeCrossHead(state.selectedHead);
 
   renderHeadButtons();
   renderTokens();
+  renderTargetTokens();
   renderSummaryMetrics(preset);
   renderClaimNumbers();
   renderStackDiagram(preset);
@@ -734,6 +812,7 @@ function render() {
   renderScaleCompare();
   renderHeads();
   renderMaskSection();
+  renderCrossAttention(crossData);
   renderFlow(preset);
   renderNormPanel(data);
   renderLearningRate(preset);
@@ -742,6 +821,7 @@ function render() {
 }
 
 el.input.addEventListener("input", render);
+el.targetInput.addEventListener("input", render);
 el.modelPreset.addEventListener("change", render);
 el.sharpness.addEventListener("input", render);
 el.scaleToggle.addEventListener("change", render);

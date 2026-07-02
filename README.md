@@ -16,6 +16,8 @@ training schedule numbers.
   numbers visible: base/big dimensions, heads, d_ff, parameters, BLEU, training
   steps, dropout, label smoothing, and warmup.
 - Toggle `sqrt(d_k)` scaling and decoder future masking.
+- Edit a target draft and inspect decoder cross-attention from target queries to
+  source tokens.
 - Inspect sinusoidal positional encoding and a compact encoder/decoder stack.
 - Explore the learning-rate schedule with warmup 4000.
 
@@ -41,7 +43,7 @@ push once a private GitHub repository is available.
 
 ## Next Steps
 
-1. Add a decoder cross-attention scene with source/target tokens.
-2. Add a short quiz/checkpoint mode after each paper section.
-3. Add more section-level examples from the paper tables.
-4. Validate the simplified attention math against a small reference script.
+1. Add a short quiz/checkpoint mode after each paper section.
+2. Add more section-level examples from the paper tables.
+3. Validate the simplified attention math against a small reference script.
+4. Add progress persistence for completed sections.
