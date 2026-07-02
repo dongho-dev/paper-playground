@@ -48,7 +48,7 @@ docs/PROJECT.md   제품 노트와 다음 단계
 
 한 줄로 말하면:
 
-> Research papers as interactive lessons.
+> 논문을 인터랙티브 학습물로 바꾸는 한국어 Paper Playground.
 
 조금 더 좁히면:
 
