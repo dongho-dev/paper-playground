@@ -1,7 +1,8 @@
-# Paper Playground 001
+# Paper Playground
 
-> Attention Is All You Need - Self-Attention 편.
-> AI/ML 논문의 핵심 수식과 구조를 직접 조작하며 이해하는 한국어 Paper Playground 실험.
+> AI/ML 논문의 핵심 메커니즘을 인터랙티브 학습물로 바꾸는 한국어 Paper Playground 실험.
+
+첫 실험: `Attention Is All You Need` - Self-Attention 편.
 
 [English README](README.en.md)
 
@@ -48,11 +49,11 @@ docs/PROJECT.md   제품 노트와 다음 단계
 
 한 줄로 말하면:
 
-> 논문을 인터랙티브 학습물로 바꾸는 한국어 Paper Playground.
+> AI/ML 논문의 핵심 메커니즘을 인터랙티브 학습물로 바꾸는 한국어 Paper Playground.
 
 조금 더 좁히면:
 
-> AI/ML 논문의 핵심 수식과 구조를 직접 조작하며 이해하는 한국어 Paper Playground.
+> 첫 실험은 Transformer Self-Attention이고, 목표는 여러 AI 논문으로 확장할 수 있는 변환 흐름을 찾는 것이다.
 
 ## 다음 단계
 

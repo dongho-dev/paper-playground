@@ -1,7 +1,8 @@
-# Paper Playground 001
+# Paper Playground
 
-> Attention Is All You Need - Self-Attention edition.
-> A Korean interactive paper playground for learning the core mechanics of AI/ML papers by manipulating formulas and structures directly.
+> A Korean Paper Playground experiment that turns core mechanisms from AI/ML papers into interactive lessons.
+
+First experiment: `Attention Is All You Need` - Self-Attention edition.
 
 [한국어 README](README.md)
 
@@ -46,11 +47,11 @@ docs/PROJECT.md   Product notes and next steps
 
 Short version:
 
-> Research papers as interactive lessons.
+> AI/ML papers as interactive lessons.
 
 Sharper version:
 
-> A Korean Paper Playground for understanding the core formulas and structures of AI/ML papers through direct manipulation.
+> The first experiment covers Transformer Self-Attention, but the product direction is a repeatable workflow for many AI papers.
 
 ## Next Steps
 

@@ -1,6 +1,6 @@
-# Paper Playground 001 Spec
+# Paper Playground Spec
 
-## Experiment
+## Experiment 001
 
 Paper Playground 001: `Attention Is All You Need` - Self-Attention edition.
 

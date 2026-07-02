@@ -2,9 +2,10 @@
 
 ## Goal
 
-Build `Paper Playground 001`: a public, version-controlled experiment that turns
-the Self-Attention mechanism from `Attention Is All You Need` into a Korean
-interactive learning object.
+Build `Paper Playground`: a public, version-controlled experiment for turning
+AI/ML paper mechanisms into Korean interactive learning objects.
+
+The first experiment is `Attention Is All You Need` - Self-Attention edition.
 
 ## User
 
@@ -29,7 +30,7 @@ focus on the Self-Attention mechanism:
 
 ## Current Implementation
 
-- `index.html` defines the Paper Playground 001 app and paper-ordered sections.
+- `index.html` defines the Paper Playground app and paper-ordered sections.
 - `styles.css` implements a responsive, dense learning dashboard.
 - `app.js` runs a deterministic 8-dimensional toy simulation so learners can
   inspect exact numbers without a backend or model weights.
