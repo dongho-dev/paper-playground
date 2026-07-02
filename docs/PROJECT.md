@@ -34,6 +34,9 @@ should follow the paper:
 - `app.js` runs a deterministic 8-dimensional toy simulation so learners can
   inspect exact numbers without a backend or model weights.
 - The UI uses a dark-mode visual system.
+- A first-screen attention playground lets learners choose presets, add/remove
+  tokens, pick a query, boost a selected key, change softmax sharpness, and chase
+  a mission target.
 - The first dashboard section renders a 12-card learning map that updates from
   the current input and selected model preset.
 - Paper constants for base/big models are shown beside the toy simulation so the
@@ -46,6 +49,8 @@ should follow the paper:
 - The app runs by opening `index.html`.
 - Editing text changes the token list, attention matrix, score table, and
   inspector.
+- The playground lets a beginner manipulate tokens and key bias directly before
+  reading the deeper paper-ordered sections.
 - Clicking a token changes the selected query row.
 - Switching heads changes attention behavior.
 - Scaling and masking toggles visibly change score/weight behavior.
@@ -60,5 +65,3 @@ should follow the paper:
 
 - The simulation uses deterministic toy vectors, not trained model weights.
 - There is no quiz or progress persistence yet.
-- A GitHub private remote still needs to be created with an available repo
-  creation path or user-provided remote.

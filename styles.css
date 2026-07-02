@@ -196,12 +196,294 @@ input[type="range"] {
 }
 
 .controls-band,
+.playground-panel,
 .paper-step,
 .inspector-section {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+
+.playground-panel {
+  padding: 18px;
+}
+
+.playground-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.playground-head h1 {
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.mission-card,
+.play-control,
+.play-token,
+.focus-key,
+.play-status,
+.add-token {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.mission-card {
+  min-height: 118px;
+  padding: 14px;
+}
+
+.mission-card.is-complete {
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.2), 0 0 28px rgba(52, 211, 153, 0.16);
+}
+
+.mission-card span,
+.add-token span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.mission-card strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.mission-card p,
+.play-status span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.playground-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 160px) repeat(3, auto);
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.preset-row,
+.focus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.add-token {
+  padding: 10px;
+}
+
+.add-token input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--field);
+}
+
+.play-btn {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.play-btn:hover,
+.play-btn:focus-visible {
+  border-color: var(--teal);
+  outline: 0;
+}
+
+.play-btn.is-strong {
+  color: #03131b;
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.playground-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.36fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.toy-board {
+  min-height: 320px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.play-token {
+  position: relative;
+  min-height: 156px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+}
+
+.play-token::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--fill);
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.05), rgba(34, 211, 238, 0.18));
+  pointer-events: none;
+}
+
+.play-token.is-query {
+  border-color: var(--teal);
+}
+
+.play-token.is-key {
+  outline: 2px solid var(--coral);
+  outline-offset: 2px;
+}
+
+.play-token.is-top .play-token-main strong {
+  color: var(--leaf);
+}
+
+.play-token.is-mission::after {
+  content: "mission";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.play-token-main,
+.play-token-query {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+}
+
+.play-token-main {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto 1fr;
+  gap: 6px;
+  align-items: start;
+  min-height: 110px;
+  padding: 14px;
+  text-align: left;
+}
+
+.play-token-main span {
+  font-size: 17px;
+  font-weight: 780;
+  overflow-wrap: anywhere;
+}
+
+.play-token-main strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.play-token-main em {
+  grid-column: 1 / 2;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.play-token-main i {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: end;
+  width: 18px;
+  min-height: 8px;
+  border-radius: 999px 999px 4px 4px;
+}
+
+.play-token-query {
+  min-height: 38px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.play-token-query:hover,
+.play-token-query:focus-visible {
+  color: var(--ink);
+  outline: 0;
+}
+
+.play-control-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.play-control {
+  padding: 14px;
+}
+
+.focus-target {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.focus-target strong {
+  font-size: 24px;
+}
+
+.focus-target span {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-key-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.focus-key {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  color: var(--ink);
+}
+
+.focus-key.is-selected {
+  border-color: var(--coral);
+}
+
+.focus-key strong {
+  color: var(--teal);
+  font-variant-numeric: tabular-nums;
+}
+
+.play-status {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
 }
 
 .controls-band {
@@ -1159,6 +1441,9 @@ tbody tr:last-child td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .playground-head,
+  .playground-grid,
+  .playground-toolbar,
   .controls-band,
   .architecture-grid,
   .attention-layout,
@@ -1206,12 +1491,18 @@ tbody tr:last-child td {
 }
 
 @media (max-width: 640px) {
+  .topbar {
+    padding: 12px 10px;
+  }
+
   .dashboard {
     padding: 10px;
     overflow-x: hidden;
   }
 
+  .top-metrics,
   .workbench,
+  .playground-panel,
   .controls-band,
   .paper-step,
   .paper-nav,
@@ -1224,9 +1515,23 @@ tbody tr:last-child td {
   }
 
   .controls-band,
+  .playground-panel,
   .paper-step,
   .paper-nav {
     width: calc(100vw - 20px);
+  }
+
+  .playground-toolbar,
+  .preset-row,
+  .focus-actions {
+    width: 100%;
+  }
+
+  .playground-toolbar .play-btn,
+  .preset-row .play-btn,
+  .focus-actions .play-btn,
+  .add-token {
+    width: 100%;
   }
 
   .controls-band .field,
@@ -1241,6 +1546,10 @@ tbody tr:last-child td {
 
   .paper-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .toy-board {
+    grid-template-columns: 1fr;
   }
 
   .paper-step {

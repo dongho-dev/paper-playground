@@ -21,6 +21,7 @@
 
       <section class="dashboard">
         <aside class="paper-nav" aria-label="Paper sections">
+          <a href="#playground">놀이터</a>
           <a href="#roadmap">0. 학습 지도</a>
           <a href="#intro">1. 토큰 세기</a>
           <a href="#pairs">2. 모든 짝 세기</a>
@@ -36,6 +37,61 @@
         </aside>
 
         <section class="workbench">
+          <section class="playground-panel" id="playground" aria-label="Attention playground">
+            <div class="playground-head">
+              <div>
+                <span class="section-kicker">Playground</span>
+                <h1>토큰을 만지면 attention이 바로 바뀐다</h1>
+                <p>
+                  문장을 바꾸고, 토큰을 고르고, 관심 자석을 올려서 어떤 key가 1등이 되는지 실험한다.
+                </p>
+              </div>
+              <div class="mission-card" id="missionCard"></div>
+            </div>
+
+            <div class="playground-toolbar">
+              <div class="preset-row" aria-label="Sentence presets">
+                <button type="button" class="play-btn" data-example="the cat chased the mouse because it was hungry" data-target="it was hungry">고양이</button>
+                <button type="button" class="play-btn" data-example="the robot found the key because it was shiny" data-target="it was shiny">로봇</button>
+                <button type="button" class="play-btn" data-example="minji shared the snack because she was kind" data-target="she was kind">친구</button>
+                <button type="button" class="play-btn" data-example="the rocket missed the moon because it was fast" data-target="it was fast">로켓</button>
+              </div>
+              <label class="add-token">
+                <span>토큰 넣기</span>
+                <input id="newTokenInput" type="text" value="wow" maxlength="14" />
+              </label>
+              <button type="button" class="play-btn" id="addTokenBtn">추가</button>
+              <button type="button" class="play-btn" id="removeTokenBtn">선택 삭제</button>
+              <button type="button" class="play-btn" id="shuffleTokensBtn">섞기</button>
+            </div>
+
+            <div class="playground-grid">
+              <div class="toy-board" id="playgroundBoard"></div>
+              <div class="play-control-stack">
+                <section class="play-control">
+                  <span class="table-caption">관심 자석</span>
+                  <div class="focus-target" id="focusTarget"></div>
+                  <div class="focus-actions">
+                    <button type="button" class="play-btn is-strong" id="boostUpBtn">관심 +</button>
+                    <button type="button" class="play-btn" id="boostDownBtn">관심 -</button>
+                    <button type="button" class="play-btn" id="resetFocusBtn">초기화</button>
+                    <button type="button" class="play-btn" id="randomFocusBtn">랜덤</button>
+                  </div>
+                  <div class="focus-key-list" id="focusKeyList"></div>
+                </section>
+                <section class="play-control">
+                  <span class="table-caption">Softmax 온도</span>
+                  <div class="focus-actions">
+                    <button type="button" class="play-btn" id="softModeBtn">부드럽게</button>
+                    <button type="button" class="play-btn" id="sharpModeBtn">날카롭게</button>
+                    <button type="button" class="play-btn" id="newMissionBtn">새 미션</button>
+                  </div>
+                  <div class="play-status" id="playStatus"></div>
+                </section>
+              </div>
+            </div>
+          </section>
+
           <section class="controls-band" aria-label="Interactive controls">
             <label class="field field-wide">
               <span>입력 문장</span>

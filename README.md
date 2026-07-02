@@ -9,6 +9,9 @@ the paper's real variables.
 
 ## Current Scope
 
+- Play with a first-screen attention playground: choose sentence presets, add or
+  remove tokens, pick a query, boost key attention, shuffle tokens, and complete
+  small missions.
 - Walk through the paper with a fine-grained 12-step learning map.
 - Use a dark dashboard UI designed for repeated study.
 - Edit a sentence and watch the token count, attention matrix, Q/K/V vectors,
@@ -39,12 +42,12 @@ docs/PROJECT.md Product notes and next steps
 
 ## Versioning
 
-Work is kept in git. Use small local commits after stable feature slices, then
-push once a private GitHub repository is available.
+Work is kept in git with small local commits after stable feature slices and
+pushed to the private GitHub remote.
 
 ## Next Steps
 
 1. Add a short quiz/checkpoint mode after each tiny section.
-2. Add Korean example sentences beside the English default.
+2. Add Korean example sentences beside the English presets.
 3. Validate the simplified attention math against a small reference script.
 4. Add progress persistence for completed sections.

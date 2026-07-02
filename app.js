@@ -45,17 +45,31 @@ const state = {
   tokens: [],
   targetTokens: [],
   selectedToken: 0,
+  selectedKey: 0,
   selectedTarget: 0,
   selectedHead: 0,
   sharpness: 1,
   scale: true,
   mask: false,
   preset: "base",
+  focusBias: [],
+  missionKey: 0,
 };
 
 const el = {
   input: document.querySelector("#sequenceInput"),
   targetInput: document.querySelector("#targetInput"),
+  newTokenInput: document.querySelector("#newTokenInput"),
+  addTokenBtn: document.querySelector("#addTokenBtn"),
+  removeTokenBtn: document.querySelector("#removeTokenBtn"),
+  shuffleTokensBtn: document.querySelector("#shuffleTokensBtn"),
+  boostUpBtn: document.querySelector("#boostUpBtn"),
+  boostDownBtn: document.querySelector("#boostDownBtn"),
+  resetFocusBtn: document.querySelector("#resetFocusBtn"),
+  randomFocusBtn: document.querySelector("#randomFocusBtn"),
+  softModeBtn: document.querySelector("#softModeBtn"),
+  sharpModeBtn: document.querySelector("#sharpModeBtn"),
+  newMissionBtn: document.querySelector("#newMissionBtn"),
   modelPreset: document.querySelector("#modelPreset"),
   tokenList: document.querySelector("#tokenList"),
   targetTokenList: document.querySelector("#targetTokenList"),
@@ -65,6 +79,11 @@ const el = {
   maskToggle: document.querySelector("#maskToggle"),
   trainStep: document.querySelector("#trainStepInput"),
   summaryMetrics: document.querySelector("#summaryMetrics"),
+  playgroundBoard: document.querySelector("#playgroundBoard"),
+  missionCard: document.querySelector("#missionCard"),
+  focusTarget: document.querySelector("#focusTarget"),
+  focusKeyList: document.querySelector("#focusKeyList"),
+  playStatus: document.querySelector("#playStatus"),
   lessonGrid: document.querySelector("#lessonGrid"),
   claimNumbers: document.querySelector("#claimNumbers"),
   pairWalkthrough: document.querySelector("#pairWalkthrough"),
@@ -108,6 +127,32 @@ function tokenize(text) {
     .filter(Boolean);
 
   return tokens.length ? tokens.slice(0, 10) : ["token"];
+}
+
+function clampIndex(index, length) {
+  return Math.max(0, Math.min(index, length - 1));
+}
+
+function setSourceTokens(tokens) {
+  const safeTokens = tokens.map((token) => token.trim()).filter(Boolean).slice(0, 10);
+  el.input.value = safeTokens.length ? safeTokens.join(" ") : "token";
+  const nextLength = safeTokens.length || 1;
+  state.selectedToken = clampIndex(state.selectedToken, nextLength);
+  state.selectedKey = clampIndex(state.selectedKey, nextLength);
+  render();
+}
+
+function syncFocusBias() {
+  const next = Array.from({ length: state.tokens.length }, (_, index) => state.focusBias[index] || 0);
+  state.focusBias = next;
+  state.selectedKey = clampIndex(state.selectedKey, state.tokens.length);
+  state.missionKey = clampIndex(state.missionKey, state.tokens.length);
+}
+
+function chooseNewMission() {
+  if (!state.tokens.length) return;
+  const next = (state.missionKey + 2 + state.selectedToken) % state.tokens.length;
+  state.missionKey = next === state.selectedToken && state.tokens.length > 1 ? (next + 1) % state.tokens.length : next;
 }
 
 function hash(input) {
@@ -186,7 +231,7 @@ function computeHead(head, options = {}) {
   const q = base.map((vector) => projection(vector, head, "q"));
   const k = base.map((vector) => projection(vector, head, "k"));
   const v = base.map((vector) => projection(vector, head, "v"));
-  const raw = q.map((query) => k.map((key) => dot(query, key)));
+  const raw = q.map((query) => k.map((key, keyIndex) => dot(query, key) + (state.focusBias[keyIndex] || 0)));
   const usedScores = raw.map((row, queryIndex) =>
     row.map((score, keyIndex) => {
       if (useMask && keyIndex > queryIndex) {
@@ -289,6 +334,87 @@ function renderTargetTokens() {
     });
     el.targetTokenList.append(button);
   });
+}
+
+function renderPlayground(data) {
+  const row = data.weights[state.selectedToken];
+  const best = topIndex(row);
+  const missionDone = best === state.missionKey;
+  const selectedKey = state.tokens[state.selectedKey];
+  const missionToken = state.tokens[state.missionKey];
+
+  el.missionCard.innerHTML = `
+    <span>오늘의 미션</span>
+    <strong>${escapeHTML(missionToken)}를 1등 key로 만들기</strong>
+    <p>${missionDone ? "성공. attention이 원하는 토큰을 가장 크게 보고 있다." : `지금 1등은 ${escapeHTML(state.tokens[best])}이다.`}</p>
+  `;
+  el.missionCard.classList.toggle("is-complete", missionDone);
+
+  el.playgroundBoard.innerHTML = "";
+  state.tokens.forEach((token, index) => {
+    const card = document.createElement("article");
+    card.className = [
+      "play-token",
+      index === state.selectedToken ? "is-query" : "",
+      index === state.selectedKey ? "is-key" : "",
+      index === best ? "is-top" : "",
+      index === state.missionKey ? "is-mission" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    card.style.setProperty("--weight", row[index]);
+    card.style.setProperty("--fill", `${10 + row[index] * 70}%`);
+
+    const pickKey = document.createElement("button");
+    pickKey.type = "button";
+    pickKey.className = "play-token-main";
+    pickKey.innerHTML = `
+      <span>${escapeHTML(token)}</span>
+      <strong>${(row[index] * 100).toFixed(1)}%</strong>
+      <em>bias ${format(state.focusBias[index] || 0, 2)}</em>
+      <i style="height:${Math.max(8, row[index] * 120)}px; background:${heatColor(row[index], state.selectedHead)}"></i>
+    `;
+    pickKey.addEventListener("click", () => {
+      state.selectedKey = index;
+      render();
+    });
+
+    const makeQuery = document.createElement("button");
+    makeQuery.type = "button";
+    makeQuery.className = "play-token-query";
+    makeQuery.textContent = index === state.selectedToken ? "질문 중" : "질문";
+    makeQuery.addEventListener("click", () => {
+      state.selectedToken = index;
+      state.selectedKey = index;
+      render();
+    });
+
+    card.append(pickKey, makeQuery);
+    el.playgroundBoard.append(card);
+  });
+
+  el.focusTarget.innerHTML = `
+    <strong>${escapeHTML(selectedKey)}</strong>
+    <span>현재 bias ${format(state.focusBias[state.selectedKey] || 0, 2)}</span>
+  `;
+
+  el.focusKeyList.innerHTML = "";
+  state.tokens.forEach((token, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `focus-key${index === state.selectedKey ? " is-selected" : ""}`;
+    button.innerHTML = `<span>${escapeHTML(token)}</span><strong>${(row[index] * 100).toFixed(0)}%</strong>`;
+    button.addEventListener("click", () => {
+      state.selectedKey = index;
+      render();
+    });
+    el.focusKeyList.append(button);
+  });
+
+  el.playStatus.innerHTML = `
+    <strong>${escapeHTML(state.tokens[state.selectedToken])}</strong>
+    <span>query가 ${state.tokens.length}개 key를 보고 있다. 확률 합 ${format(row.reduce((sum, weight) => sum + weight, 0), 2)}</span>
+  `;
 }
 
 function renderSummaryMetrics(preset) {
@@ -917,8 +1043,9 @@ function renderInspector(data) {
 function render() {
   state.tokens = tokenize(el.input.value);
   state.targetTokens = tokenize(el.targetInput.value);
-  state.selectedToken = Math.min(state.selectedToken, state.tokens.length - 1);
-  state.selectedTarget = Math.min(state.selectedTarget, state.targetTokens.length - 1);
+  state.selectedToken = clampIndex(state.selectedToken, state.tokens.length);
+  syncFocusBias();
+  state.selectedTarget = clampIndex(state.selectedTarget, state.targetTokens.length);
   state.sharpness = Number(el.sharpness.value) / 100;
   state.scale = el.scaleToggle.checked;
   state.mask = el.maskToggle.checked;
@@ -931,6 +1058,7 @@ function render() {
   renderHeadButtons();
   renderTokens();
   renderTargetTokens();
+  renderPlayground(data);
   renderSummaryMetrics(preset);
   renderLessonGrid(preset, data);
   renderClaimNumbers();
@@ -961,5 +1089,82 @@ el.sharpness.addEventListener("input", render);
 el.scaleToggle.addEventListener("change", render);
 el.maskToggle.addEventListener("change", render);
 el.trainStep.addEventListener("input", render);
+
+document.querySelectorAll("[data-example]").forEach((button) => {
+  button.addEventListener("click", () => {
+    el.input.value = button.dataset.example;
+    el.targetInput.value = button.dataset.target || "";
+    state.selectedToken = 0;
+    state.selectedKey = 0;
+    state.selectedTarget = 0;
+    state.focusBias = [];
+    state.missionKey = Math.min(2, tokenize(button.dataset.example).length - 1);
+    render();
+  });
+});
+
+el.addTokenBtn.addEventListener("click", () => {
+  const nextToken = tokenize(el.newTokenInput.value)[0] || "wow";
+  const tokens = tokenize(el.input.value);
+  tokens.push(nextToken);
+  setSourceTokens(tokens);
+});
+
+el.removeTokenBtn.addEventListener("click", () => {
+  const tokens = tokenize(el.input.value);
+  if (tokens.length <= 1) return;
+  tokens.splice(state.selectedKey, 1);
+  state.focusBias.splice(state.selectedKey, 1);
+  state.selectedToken = Math.min(state.selectedToken, tokens.length - 1);
+  state.selectedKey = Math.min(state.selectedKey, tokens.length - 1);
+  setSourceTokens(tokens);
+});
+
+el.shuffleTokensBtn.addEventListener("click", () => {
+  const tokens = tokenize(el.input.value);
+  for (let index = tokens.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [tokens[index], tokens[swapIndex]] = [tokens[swapIndex], tokens[index]];
+  }
+  state.focusBias = [];
+  state.selectedToken = 0;
+  state.selectedKey = 0;
+  setSourceTokens(tokens);
+});
+
+el.boostUpBtn.addEventListener("click", () => {
+  state.focusBias[state.selectedKey] = Math.min(2.5, (state.focusBias[state.selectedKey] || 0) + 0.35);
+  render();
+});
+
+el.boostDownBtn.addEventListener("click", () => {
+  state.focusBias[state.selectedKey] = Math.max(-2.5, (state.focusBias[state.selectedKey] || 0) - 0.35);
+  render();
+});
+
+el.resetFocusBtn.addEventListener("click", () => {
+  state.focusBias = state.tokens.map(() => 0);
+  render();
+});
+
+el.randomFocusBtn.addEventListener("click", () => {
+  state.focusBias = state.tokens.map(() => Math.round((Math.random() * 1.8 - 0.6) * 100) / 100);
+  render();
+});
+
+el.softModeBtn.addEventListener("click", () => {
+  el.sharpness.value = "60";
+  render();
+});
+
+el.sharpModeBtn.addEventListener("click", () => {
+  el.sharpness.value = "175";
+  render();
+});
+
+el.newMissionBtn.addEventListener("click", () => {
+  chooseNewMission();
+  render();
+});
 
 render();
