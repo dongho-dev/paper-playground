@@ -1,19 +1,23 @@
 # Transformer Paper Interactive
 
-A local-first interactive web explainer for the Transformer architecture from
-"Attention Is All You Need".
+A local-first interactive dashboard for learning the Transformer paper,
+"Attention Is All You Need", in paper order.
 
-The first version focuses on a small but meaningful problem: learners often
-read the attention formula without developing a working intuition for how token
-relationships become attention weights.
+The app is intentionally static: open `index.html` and experiment with token
+sequences, query tokens, heads, masking, scaling, model presets, and the paper's
+training schedule numbers.
 
-## MVP
+## Current Scope
 
-- Edit a short input sequence.
-- Inspect token and position vectors.
-- Select an attention head and query token.
-- See Q/K/V vectors, raw dot scores, softmax weights, and the weighted output.
-- Compare heads and inspect a compact encoder-layer flow.
+- Walk through the paper from the motivation to results.
+- Edit a sentence and watch the token count, attention matrix, Q/K/V vectors,
+  raw scores, scaled scores, softmax weights, and top links update.
+- Compare a small 4-head deterministic simulation while keeping the real paper
+  numbers visible: base/big dimensions, heads, d_ff, parameters, BLEU, training
+  steps, dropout, label smoothing, and warmup.
+- Toggle `sqrt(d_k)` scaling and decoder future masking.
+- Inspect sinusoidal positional encoding and a compact encoder/decoder stack.
+- Explore the learning-rate schedule with warmup 4000.
 
 ## Run
 
@@ -24,17 +28,20 @@ No build step, backend, package manager, or API key is required.
 ## Project Shape
 
 ```text
-index.html      App shell
-styles.css      Layout and visual system
-app.js          Deterministic attention simulation
+index.html      App shell and ordered paper sections
+styles.css      Responsive dashboard layout and visual system
+app.js          Deterministic attention simulation and render logic
 docs/PROJECT.md Product notes and next steps
 ```
 
+## Versioning
+
+Work is kept in git. Use small local commits after stable feature slices, then
+push once a private GitHub repository is available.
+
 ## Next Steps
 
-1. Add a decoder cross-attention scene.
-2. Add masking and autoregressive generation.
-3. Add a small quiz mode using the current sequence.
-4. Add examples mapped to paper sections.
-5. Validate simplified math with a known reference implementation.
-
+1. Add a decoder cross-attention scene with source/target tokens.
+2. Add a short quiz/checkpoint mode after each paper section.
+3. Add more section-level examples from the paper tables.
+4. Validate the simplified attention math against a small reference script.

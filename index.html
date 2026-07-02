@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,101 +10,226 @@
     <main class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <span class="brand-mark">T</span>
-          <span>Transformer Lens</span>
+          <span class="brand-mark">A</span>
+          <div>
+            <strong>Attention Paper Lab</strong>
+            <span>Attention Is All You Need 순서형 워크벤치</span>
+          </div>
         </div>
-        <nav class="tabs" aria-label="Scenes">
-          <button class="tab is-active" data-scene="attention">Attention</button>
-          <button class="tab" data-scene="heads">Heads</button>
-          <button class="tab" data-scene="encoder">Encoder</button>
-        </nav>
+        <div class="top-metrics" id="summaryMetrics" aria-label="Current model summary"></div>
       </header>
 
-      <section class="workspace">
-        <aside class="control-panel" aria-label="Controls">
-          <label class="field">
-            <span>Input</span>
-            <textarea id="sequenceInput" rows="4" spellcheck="false">the cat sat on the mat</textarea>
-          </label>
-
-          <div class="field">
-            <span>Head</span>
-            <div class="segmented" id="headButtons" role="group" aria-label="Attention head"></div>
-          </div>
-
-          <label class="field">
-            <span>Sharpness</span>
-            <input id="temperatureInput" type="range" min="40" max="180" value="100" />
-          </label>
-
-          <div class="field">
-            <span>Query token</span>
-            <div class="token-list" id="tokenList"></div>
-          </div>
+      <section class="dashboard">
+        <aside class="paper-nav" aria-label="Paper sections">
+          <a href="#intro">1. 문제 설정</a>
+          <a href="#architecture">2. 구조</a>
+          <a href="#attention">3. 어텐션</a>
+          <a href="#heads">4. 멀티 헤드</a>
+          <a href="#decoder">5. 디코더 마스크</a>
+          <a href="#ffn">6. FFN·정규화</a>
+          <a href="#training">7. 학습</a>
+          <a href="#results">8. 결과</a>
         </aside>
 
-        <section class="scene-panel">
-          <section class="scene is-active" id="scene-attention" aria-label="Attention scene">
-            <div class="scene-header">
-              <div>
-                <h1>Scaled Dot-Product Attention</h1>
-                <p class="formula">Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V</p>
-              </div>
-              <div class="pill" id="selectedTokenLabel"></div>
+        <section class="workbench">
+          <section class="controls-band" aria-label="Interactive controls">
+            <label class="field field-wide">
+              <span>입력 문장</span>
+              <textarea id="sequenceInput" rows="3" spellcheck="false">the animal did not cross the street because it was tired</textarea>
+            </label>
+
+            <label class="field">
+              <span>논문 모델</span>
+              <select id="modelPreset">
+                <option value="base">Transformer base</option>
+                <option value="big">Transformer big</option>
+              </select>
+            </label>
+
+            <div class="field">
+              <span>Query token</span>
+              <div class="token-list" id="tokenList"></div>
             </div>
 
+            <div class="field">
+              <span>시뮬레이션 head</span>
+              <div class="segmented" id="headButtons" role="group" aria-label="Attention head"></div>
+            </div>
+
+            <label class="field">
+              <span>Softmax sharpness</span>
+              <input id="sharpnessInput" type="range" min="50" max="180" value="100" />
+            </label>
+
+            <div class="field field-switches">
+              <label class="switch">
+                <input id="scaleToggle" type="checkbox" checked />
+                <span>sqrt(d_k) 스케일</span>
+              </label>
+              <label class="switch">
+                <input id="maskToggle" type="checkbox" />
+                <span>미래 토큰 마스크</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="paper-step" id="intro">
+            <div class="step-copy">
+              <span class="section-kicker">Sections 1-2</span>
+              <h1>순환 없이 모든 토큰 관계를 한 번에 본다</h1>
+              <p>
+                논문의 출발점은 긴 시퀀스에서 RNN의 순차 계산 병목을 줄이는 것이다.
+                현재 문장 길이 n에 대해 self-attention은 모든 token-to-token 연결을
+                n x n 격자로 만들고, 가장 먼 두 위치도 한 attention layer 안에서 만난다.
+              </p>
+            </div>
+            <div class="stat-grid" id="claimNumbers"></div>
+          </section>
+
+          <section class="paper-step" id="architecture">
+            <div class="step-copy">
+              <span class="section-kicker">Section 3.1</span>
+              <h2>Encoder-Decoder 스택과 실제 논문 수치</h2>
+              <p>
+                base 모델은 encoder 6층, decoder 6층, d_model 512, feed-forward 2048,
+                attention head 8개를 기준으로 설명된다.
+              </p>
+            </div>
+            <div class="architecture-grid">
+              <div class="stack-diagram" id="stackDiagram"></div>
+              <dl class="model-stats" id="modelStats"></dl>
+            </div>
+          </section>
+
+          <section class="paper-step" id="positions">
+            <div class="step-copy">
+              <span class="section-kicker">Sections 3.4-3.5</span>
+              <h2>토큰 임베딩에 위치 신호를 더한다</h2>
+              <p>
+                Transformer에는 recurrence나 convolution이 없기 때문에, 토큰 순서를
+                sinusoidal positional encoding으로 주입한다. 아래 벡터는 선택한 토큰의
+                작은 8차원 데모 표현이다.
+              </p>
+            </div>
+            <div class="position-layout">
+              <div class="vector-panel" id="positionVectors"></div>
+              <div class="position-table" id="positionTable"></div>
+            </div>
+          </section>
+
+          <section class="paper-step" id="attention">
+            <div class="step-copy">
+              <span class="section-kicker">Section 3.2.1</span>
+              <h2>Scaled Dot-Product Attention을 숫자로 따라간다</h2>
+              <p class="formula">Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V</p>
+            </div>
             <div class="attention-layout">
               <div class="matrix-wrap">
                 <div class="axis-label">keys</div>
                 <div class="matrix" id="attentionMatrix"></div>
                 <div class="axis-label vertical">queries</div>
               </div>
-
-              <div class="vector-panel">
-                <h2>Q / K / V</h2>
-                <div class="vector-stack" id="vectorStack"></div>
-              </div>
+              <div class="vector-panel" id="qkvPanel"></div>
             </div>
-
-            <div class="output-strip" id="weightedOutput"></div>
+            <div class="score-layout">
+              <div class="score-table" id="scoreTable"></div>
+              <div class="scale-panel" id="scaleCompare"></div>
+            </div>
           </section>
 
-          <section class="scene" id="scene-heads" aria-label="Multi-head scene">
-            <div class="scene-header">
-              <div>
-                <h1>Multi-Head Comparison</h1>
-                <p class="formula">Different projections expose different token relationships.</p>
-              </div>
+          <section class="paper-step" id="heads">
+            <div class="step-copy">
+              <span class="section-kicker">Section 3.2.2</span>
+              <h2>Multi-head attention은 여러 관계 공간을 병렬로 본다</h2>
+              <p>
+                논문 base 모델은 h=8, d_k=d_v=64를 사용한다. 이 데모는 4개 head로
+                축소했지만, 각 head의 projection이 달라지면 최고 가중치와 분포 엔트로피가 바뀐다.
+              </p>
             </div>
             <div class="heads-grid" id="headsGrid"></div>
           </section>
 
-          <section class="scene" id="scene-encoder" aria-label="Encoder scene">
-            <div class="scene-header">
-              <div>
-                <h1>Encoder Layer Flow</h1>
-                <p class="formula">Embedding + position -> attention -> residual -> feed-forward</p>
-              </div>
+          <section class="paper-step" id="decoder">
+            <div class="step-copy">
+              <span class="section-kicker">Section 3.2.3</span>
+              <h2>Decoder self-attention은 미래를 가린다</h2>
+              <p>
+                autoregressive 생성에서는 현재 위치가 오른쪽의 미래 출력 토큰을 볼 수 없다.
+                마스크를 켜면 attention 점수에서 미래 위치가 제외된다.
+              </p>
             </div>
-            <div class="flow" id="encoderFlow"></div>
+            <div class="decoder-layout">
+              <div class="mask-matrix" id="maskMatrix"></div>
+              <div class="decoder-notes" id="decoderNotes"></div>
+            </div>
+          </section>
+
+          <section class="paper-step" id="ffn">
+            <div class="step-copy">
+              <span class="section-kicker">Sections 3.3, 3.1</span>
+              <h2>각 위치마다 같은 FFN을 적용하고 residual로 되돌린다</h2>
+              <p>
+                attention이 토큰 사이를 섞는다면, position-wise feed-forward network는
+                각 토큰 표현 내부를 512 -> 2048 -> 512처럼 확장 후 압축한다.
+              </p>
+            </div>
+            <div class="ffn-layout">
+              <div class="flow" id="encoderFlow"></div>
+              <div class="norm-panel" id="normPanel"></div>
+            </div>
+          </section>
+
+          <section class="paper-step" id="training">
+            <div class="step-copy">
+              <span class="section-kicker">Section 5</span>
+              <h2>학습 스케줄은 warmup 후 inverse square root로 감소한다</h2>
+              <p>
+                Adam(beta1=0.9, beta2=0.98, eps=1e-9), warmup 4000 step,
+                dropout 0.1, label smoothing 0.1이 base 학습 설정의 핵심이다.
+              </p>
+            </div>
+            <div class="training-layout">
+              <label class="field">
+                <span>Training step</span>
+                <input id="trainStepInput" type="range" min="1" max="100000" value="4000" />
+              </label>
+              <div class="curve-panel">
+                <svg id="learningRateCurve" viewBox="0 0 620 180" role="img" aria-label="Learning rate schedule"></svg>
+              </div>
+              <dl class="model-stats" id="trainingStats"></dl>
+            </div>
+          </section>
+
+          <section class="paper-step" id="results">
+            <div class="step-copy">
+              <span class="section-kicker">Section 6</span>
+              <h2>결과는 품질과 학습 비용을 같이 본다</h2>
+              <p>
+                논문은 WMT 2014 번역에서 BLEU와 학습 FLOPs를 비교하며, big 모델이
+                EN-DE 28.4, EN-FR 41.8 BLEU를 보고한다.
+              </p>
+            </div>
+            <div class="results-grid" id="resultsGrid"></div>
           </section>
         </section>
 
-        <aside class="inspector-panel" aria-label="Inspector">
+        <aside class="inspector-panel" aria-label="Live inspector">
           <section class="inspector-section">
-            <h2>Current Signal</h2>
+            <h2>현재 선택</h2>
             <dl class="metrics" id="metrics"></dl>
           </section>
           <section class="inspector-section">
-            <h2>Top Links</h2>
+            <h2>Top attention links</h2>
             <ol class="rank-list" id="topLinks"></ol>
           </section>
           <section class="inspector-section">
-            <h2>Paper Anchor</h2>
-            <p>
-              The app starts from section 3.2.1 of the Transformer paper:
-              scaled dot-product attention.
-            </p>
+            <h2>논문 기준값</h2>
+            <ul class="paper-facts">
+              <li>base: N=6, d_model=512, h=8</li>
+              <li>d_k=d_v=64, d_ff=2048</li>
+              <li>WMT14 EN-DE 4.5M sentence pairs</li>
+              <li>8 NVIDIA P100, base 100K steps</li>
+            </ul>
           </section>
         </aside>
       </section>
@@ -113,4 +238,3 @@
     <script src="app.js"></script>
   </body>
 </html>
-
