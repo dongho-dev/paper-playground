@@ -13,7 +13,7 @@
           <span class="brand-mark">A</span>
           <div>
             <strong>Attention Paper Lab</strong>
-            <span>Attention Is All You Need 순서형 워크벤치</span>
+            <span>12살도 따라오는 Transformer 다크 실험실</span>
           </div>
         </div>
         <div class="top-metrics" id="summaryMetrics" aria-label="Current model summary"></div>
@@ -21,14 +21,18 @@
 
       <section class="dashboard">
         <aside class="paper-nav" aria-label="Paper sections">
-          <a href="#intro">1. 문제 설정</a>
-          <a href="#architecture">2. 구조</a>
-          <a href="#attention">3. 어텐션</a>
-          <a href="#heads">4. 멀티 헤드</a>
-          <a href="#decoder">5. 디코더 마스크</a>
-          <a href="#ffn">6. FFN·정규화</a>
-          <a href="#training">7. 학습</a>
-          <a href="#results">8. 결과</a>
+          <a href="#roadmap">0. 학습 지도</a>
+          <a href="#intro">1. 토큰 세기</a>
+          <a href="#pairs">2. 모든 짝 세기</a>
+          <a href="#positions">3. 위치 번호</a>
+          <a href="#attention">4. 한 토큰의 질문</a>
+          <a href="#softmax">5. 확률로 바꾸기</a>
+          <a href="#heads">6. 여러 눈으로 보기</a>
+          <a href="#decoder">7. 미래 가리기</a>
+          <a href="#architecture">8. 큰 구조</a>
+          <a href="#ffn">9. 한 번 더 다듬기</a>
+          <a href="#training">10. 학습 숫자</a>
+          <a href="#results">11. 논문 결과</a>
         </aside>
 
         <section class="workbench">
@@ -73,28 +77,52 @@
             </div>
           </section>
 
+          <section class="paper-step lesson-roadmap" id="roadmap">
+            <div class="step-copy">
+              <span class="section-kicker">12살 버전 지도</span>
+              <h1>작은 숫자 하나씩 쌓아서 Transformer까지 간다</h1>
+              <p>
+                처음에는 토큰을 세고, 그다음 토큰끼리 몇 번 비교하는지 본다.
+                마지막에는 d_model, head, d_ff 같은 논문 변수를 실제 숫자로 키워 본다.
+              </p>
+            </div>
+            <div class="lesson-grid" id="lessonGrid"></div>
+          </section>
+
           <section class="paper-step" id="intro">
             <div class="step-copy">
-              <span class="section-kicker">Sections 1-2</span>
-              <h1>순환 없이 모든 토큰 관계를 한 번에 본다</h1>
+              <span class="section-kicker">Step 1</span>
+              <h1>문장을 작은 말 조각으로 자른다</h1>
               <p>
-                논문의 출발점은 긴 시퀀스에서 RNN의 순차 계산 병목을 줄이는 것이다.
-                현재 문장 길이 n에 대해 self-attention은 모든 token-to-token 연결을
-                n x n 격자로 만들고, 가장 먼 두 위치도 한 attention layer 안에서 만난다.
+                Transformer는 문장을 한 번에 외우지 않는다. 먼저 문장을 토큰으로 자르고,
+                각 토큰마다 숫자 벡터를 붙인다. 지금 입력 문장의 토큰 수를 n이라고 부른다.
               </p>
             </div>
             <div class="stat-grid" id="claimNumbers"></div>
           </section>
 
-          <section class="paper-step" id="architecture">
+          <section class="paper-step" id="pairs">
             <div class="step-copy">
-              <span class="section-kicker">Section 3.1</span>
-              <h2>Encoder-Decoder 스택과 실제 논문 수치</h2>
+              <span class="section-kicker">Step 2</span>
+              <h2>토큰끼리 전부 짝을 지어 본다</h2>
               <p>
-                base 모델은 encoder 6층, decoder 6층, d_model 512, feed-forward 2048,
-                attention head 8개를 기준으로 설명된다.
+                attention의 첫 감각은 간단하다. 토큰 10개면 각 토큰이 10개를 모두 보니
+                10 x 10 = 100개의 작은 비교 점수가 생긴다.
               </p>
             </div>
+            <div class="pair-walkthrough" id="pairWalkthrough"></div>
+          </section>
+
+          <section class="paper-step" id="architecture">
+            <div class="step-copy">
+              <span class="section-kicker">Step 8 · Section 3.1</span>
+              <h2>쉬운 숫자에서 논문 숫자로 키운다</h2>
+              <p>
+                이 화면의 데모는 8차원과 4개 head로 작게 시작한다. 논문 base 모델은
+                d_model 512, head 8개, feed-forward 2048로 훨씬 크게 계산한다.
+              </p>
+            </div>
+            <div class="variable-ladder" id="variableLadder"></div>
             <div class="architecture-grid">
               <div class="stack-diagram" id="stackDiagram"></div>
               <dl class="model-stats" id="modelStats"></dl>
@@ -103,12 +131,11 @@
 
           <section class="paper-step" id="positions">
             <div class="step-copy">
-              <span class="section-kicker">Sections 3.4-3.5</span>
-              <h2>토큰 임베딩에 위치 신호를 더한다</h2>
+              <span class="section-kicker">Step 3 · Sections 3.4-3.5</span>
+              <h2>같은 단어도 위치 번호가 다르면 다르게 보인다</h2>
               <p>
-                Transformer에는 recurrence나 convolution이 없기 때문에, 토큰 순서를
-                sinusoidal positional encoding으로 주입한다. 아래 벡터는 선택한 토큰의
-                작은 8차원 데모 표현이다.
+                "the"가 두 번 나와도 앞쪽 the와 뒤쪽 the는 위치가 다르다.
+                Transformer는 위치 번호를 작은 숫자 벡터로 바꿔 토큰 벡터에 더한다.
               </p>
             </div>
             <div class="position-layout">
@@ -119,10 +146,15 @@
 
           <section class="paper-step" id="attention">
             <div class="step-copy">
-              <span class="section-kicker">Section 3.2.1</span>
-              <h2>Scaled Dot-Product Attention을 숫자로 따라간다</h2>
+              <span class="section-kicker">Steps 4-5 · Section 3.2.1</span>
+              <h2>한 토큰이 다른 토큰들에게 점수를 준다</h2>
+              <p>
+                선택한 query 토큰이 각 key 토큰을 얼마나 볼지 숫자로 정한다.
+                점수는 softmax를 지나면서 전부 더하면 1.00이 되는 비율로 바뀐다.
+              </p>
               <p class="formula">Attention(Q, K, V) = softmax(QK^T / sqrt(d_k))V</p>
             </div>
+            <div class="easy-equation" id="easyEquation"></div>
             <div class="attention-layout">
               <div class="matrix-wrap">
                 <div class="axis-label">keys</div>
@@ -131,6 +163,7 @@
               </div>
               <div class="vector-panel" id="qkvPanel"></div>
             </div>
+            <div id="softmax" class="anchor-point"></div>
             <div class="score-layout">
               <div class="score-table" id="scoreTable"></div>
               <div class="scale-panel" id="scaleCompare"></div>
@@ -139,11 +172,11 @@
 
           <section class="paper-step" id="heads">
             <div class="step-copy">
-              <span class="section-kicker">Section 3.2.2</span>
-              <h2>Multi-head attention은 여러 관계 공간을 병렬로 본다</h2>
+              <span class="section-kicker">Step 6 · Section 3.2.2</span>
+              <h2>한 번만 보지 않고 여러 눈으로 본다</h2>
               <p>
-                논문 base 모델은 h=8, d_k=d_v=64를 사용한다. 이 데모는 4개 head로
-                축소했지만, 각 head의 projection이 달라지면 최고 가중치와 분포 엔트로피가 바뀐다.
+                head 하나는 한 가지 기준으로 본다. 여러 head를 쓰면 같은 문장도
+                위치, 의미, 반복 같은 다른 기준으로 동시에 볼 수 있다.
               </p>
             </div>
             <div class="heads-grid" id="headsGrid"></div>
@@ -151,11 +184,11 @@
 
           <section class="paper-step" id="decoder">
             <div class="step-copy">
-              <span class="section-kicker">Section 3.2.3</span>
-              <h2>Decoder는 미래를 가리고 encoder 출력을 다시 본다</h2>
+              <span class="section-kicker">Step 7 · Section 3.2.3</span>
+              <h2>정답을 미리 훔쳐보지 못하게 가린다</h2>
               <p>
-                autoregressive 생성에서는 현재 위치가 오른쪽의 미래 출력 토큰을 볼 수 없다.
-                그 다음 encoder-decoder attention에서 target query가 source sentence의 key/value를 참조한다.
+                decoder는 다음 단어를 맞히는 학생처럼 행동한다. 아직 만들지 않은 오른쪽 단어는 가리고,
+                이미 만든 target 토큰으로 source 문장을 다시 읽는다.
               </p>
             </div>
             <div class="decoder-layout">
@@ -181,11 +214,11 @@
 
           <section class="paper-step" id="ffn">
             <div class="step-copy">
-              <span class="section-kicker">Sections 3.3, 3.1</span>
-              <h2>각 위치마다 같은 FFN을 적용하고 residual로 되돌린다</h2>
+              <span class="section-kicker">Step 9 · Sections 3.3, 3.1</span>
+              <h2>섞은 숫자를 한 번 더 다듬는다</h2>
               <p>
-                attention이 토큰 사이를 섞는다면, position-wise feed-forward network는
-                각 토큰 표현 내부를 512 -> 2048 -> 512처럼 확장 후 압축한다.
+                attention이 "누구를 볼지" 정했다면 FFN은 각 토큰 안의 숫자를 다시 정리한다.
+                논문 base에서는 512개 숫자를 2048개로 키웠다가 다시 512개로 줄인다.
               </p>
             </div>
             <div class="ffn-layout">
@@ -196,11 +229,11 @@
 
           <section class="paper-step" id="training">
             <div class="step-copy">
-              <span class="section-kicker">Section 5</span>
-              <h2>학습 스케줄은 warmup 후 inverse square root로 감소한다</h2>
+              <span class="section-kicker">Step 10 · Section 5</span>
+              <h2>처음엔 천천히, 4000번 뒤에는 조심스럽게 줄인다</h2>
               <p>
-                Adam(beta1=0.9, beta2=0.98, eps=1e-9), warmup 4000 step,
-                dropout 0.1, label smoothing 0.1이 base 학습 설정의 핵심이다.
+                학습률은 한 번에 크게 올리지 않는다. 4000 step까지 준비 운동처럼 올리고,
+                그 뒤에는 점점 작게 만들어 실수를 줄인다.
               </p>
             </div>
             <div class="training-layout">
@@ -217,11 +250,11 @@
 
           <section class="paper-step" id="results">
             <div class="step-copy">
-              <span class="section-kicker">Section 6</span>
-              <h2>결과는 품질과 학습 비용을 같이 본다</h2>
+              <span class="section-kicker">Step 11 · Section 6</span>
+              <h2>마지막에는 큰 모델 숫자로 성능을 본다</h2>
               <p>
-                논문은 WMT 2014 번역에서 BLEU와 학습 FLOPs를 비교하며, big 모델이
-                EN-DE 28.4, EN-FR 41.8 BLEU를 보고한다.
+                여기까지는 작은 데모 숫자로 배웠다. 논문 결과에서는 실제 번역 데이터와
+                수천만 개 이상의 파라미터로 성능을 비교한다.
               </p>
             </div>
             <div class="results-grid" id="resultsGrid"></div>

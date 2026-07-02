@@ -3,14 +3,14 @@
 ## Goal
 
 Build a private, version-controlled learning workspace for understanding
-"Attention Is All You Need" through an ordered interactive web dashboard with
-concrete numbers from the paper.
+"Attention Is All You Need" through a dark, ordered, kid-friendly interactive
+web dashboard with concrete numbers from the paper.
 
 ## User
 
-The first user is a developer or student who wants to read the Transformer paper
-with a working visual intuition for how token relationships, projection heads,
-masking, residual paths, and training settings interact.
+The first user is a beginner learner. Explanations should start at roughly a
+12-year-old level, using one small number at a time, then gradually introduce
+the real paper variables.
 
 ## Product Direction
 
@@ -18,13 +18,14 @@ The first usable version remains static and local-first, but the learning path
 should follow the paper:
 
 1. Motivation and path length.
-2. Encoder-decoder architecture.
-3. Token embeddings and positional encodings.
-4. Scaled dot-product attention.
+2. Token count and token-pair count.
+3. Positional encodings.
+4. One query token, raw scores, scaling, and softmax.
 5. Multi-head comparison.
 6. Decoder masking and encoder-decoder cross-attention.
-7. Feed-forward, residual, and layer normalization.
-8. Training schedule and headline results.
+7. Encoder-decoder architecture.
+8. Feed-forward, residual, and layer normalization.
+9. Training schedule and headline results.
 
 ## Current Implementation
 
@@ -32,6 +33,9 @@ should follow the paper:
 - `styles.css` implements a responsive, dense learning dashboard.
 - `app.js` runs a deterministic 8-dimensional toy simulation so learners can
   inspect exact numbers without a backend or model weights.
+- The UI uses a dark-mode visual system.
+- The first dashboard section renders a 12-card learning map that updates from
+  the current input and selected model preset.
 - Paper constants for base/big models are shown beside the toy simulation so the
   simplified math stays anchored to real values.
 - Decoder cross-attention uses a separate editable target draft and shows
@@ -46,6 +50,9 @@ should follow the paper:
 - Switching heads changes attention behavior.
 - Scaling and masking toggles visibly change score/weight behavior.
 - The dashboard presents the paper in order, not as disconnected widgets.
+- The learning path starts with token counts and pair counts before showing
+  paper variables like d_model, h, d_k, d_ff, warmup, and BLEU.
+- The dashboard is dark-mode by default.
 - Browser checks show nonblank desktop and mobile rendering.
 - Stable slices are committed to git.
 

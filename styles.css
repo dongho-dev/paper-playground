@@ -1,18 +1,19 @@
 :root {
-  color-scheme: light;
-  --bg: #f6f7f2;
-  --surface: #ffffff;
-  --surface-2: #f0f4f6;
-  --ink: #182027;
-  --muted: #60707d;
-  --line: #d8ded7;
-  --teal: #0f8b8d;
-  --coral: #df5c4d;
-  --amber: #c89013;
-  --leaf: #4b8f55;
-  --blue: #456fb0;
-  --plum: #79599f;
-  --shadow: 0 16px 36px rgba(25, 34, 41, 0.08);
+  color-scheme: dark;
+  --bg: #070b12;
+  --surface: #0e1624;
+  --surface-2: #141f31;
+  --field: #0a111d;
+  --ink: #edf6ff;
+  --muted: #9fb0c1;
+  --line: rgba(148, 163, 184, 0.24);
+  --teal: #22d3ee;
+  --coral: #fb7185;
+  --amber: #fbbf24;
+  --leaf: #34d399;
+  --blue: #60a5fa;
+  --plum: #c084fc;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
 }
 
 * {
@@ -28,7 +29,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: var(--ink);
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 32rem),
+    linear-gradient(180deg, #070b12 0%, #0a0f1a 48%, #070b12 100%);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Noto Sans KR", sans-serif;
@@ -65,7 +68,7 @@ input[type="range"] {
   gap: 20px;
   padding: 12px 20px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(7, 11, 18, 0.92);
   backdrop-filter: blur(12px);
 }
 
@@ -253,7 +256,7 @@ select {
   border-radius: 8px;
   padding: 10px 12px;
   color: var(--ink);
-  background: #fbfcf8;
+  background: var(--field);
 }
 
 textarea {
@@ -280,7 +283,7 @@ input[type="range"] {
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f4f6f3;
+  background: var(--field);
 }
 
 .token-chip,
@@ -290,7 +293,7 @@ input[type="range"] {
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
-  background: #fbfcf8;
+  background: var(--surface-2);
 }
 
 .token-chip {
@@ -307,7 +310,7 @@ input[type="range"] {
 
 .token-chip.is-selected,
 .segmented button.is-active {
-  color: #fff;
+  color: #03131b;
   border-color: var(--teal);
   background: var(--teal);
 }
@@ -377,6 +380,148 @@ p {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+}
+
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.lesson-card,
+.pair-sum,
+.pair-row,
+.ladder-note,
+.ladder-row,
+.equation-step {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.lesson-card {
+  min-height: 128px;
+  padding: 14px;
+}
+
+.lesson-card span,
+.equation-step span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  color: #03131b;
+  background: var(--teal);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.lesson-card strong,
+.pair-sum strong,
+.ladder-note strong,
+.ladder-row strong,
+.equation-step strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.lesson-card p,
+.pair-sum p,
+.ladder-note p,
+.equation-step p {
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+.pair-walkthrough,
+.variable-ladder,
+.easy-equation {
+  display: grid;
+  gap: 12px;
+}
+
+.pair-walkthrough {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pair-sum {
+  min-height: 126px;
+  padding: 16px;
+}
+
+.pair-sum span,
+.ladder-note span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.pair-sum strong {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pair-list,
+.ladder-table {
+  display: grid;
+  gap: 8px;
+}
+
+.pair-list {
+  grid-column: 1 / -1;
+}
+
+.pair-row,
+.ladder-row {
+  min-height: 42px;
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.pair-row {
+  grid-template-columns: 82px minmax(0, 1fr) 120px;
+}
+
+.pair-row span,
+.ladder-row span,
+.ladder-row em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.variable-ladder {
+  grid-template-columns: minmax(220px, 0.35fr) minmax(0, 1fr);
+  margin-bottom: 16px;
+}
+
+.ladder-note {
+  padding: 16px;
+}
+
+.ladder-row {
+  grid-template-columns: 120px repeat(3, minmax(90px, 1fr)) minmax(120px, 1fr);
+}
+
+.easy-equation {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.equation-step {
+  min-height: 112px;
+  padding: 12px;
+}
+
+.anchor-point {
+  scroll-margin-top: 92px;
 }
 
 .metric-card {
@@ -467,7 +612,7 @@ p {
 .mask-matrix {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcf8;
+  background: var(--surface-2);
 }
 
 .layer-blocks span {
@@ -504,7 +649,7 @@ p {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcf8;
+  background: var(--surface-2);
 }
 
 .model-stats div,
@@ -662,11 +807,11 @@ tbody tr:last-child td {
 .matrix-cell {
   aspect-ratio: 1 / 1;
   min-width: 42px;
-  border: 1px solid rgba(24, 32, 39, 0.1);
+  border: 1px solid var(--line);
   border-radius: 6px;
   display: grid;
   place-items: center;
-  color: #122024;
+  color: var(--ink);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   background: var(--surface-2);
@@ -678,10 +823,10 @@ tbody tr:last-child td {
 }
 
 .matrix-cell.is-masked {
-  color: #8c969e;
+  color: #66758a;
   background:
-    linear-gradient(135deg, transparent 45%, rgba(24, 32, 39, 0.22) 46%, rgba(24, 32, 39, 0.22) 54%, transparent 55%),
-    #eef0ee;
+    linear-gradient(135deg, transparent 45%, rgba(148, 163, 184, 0.32) 46%, rgba(148, 163, 184, 0.32) 54%, transparent 55%),
+    #111827;
 }
 
 .score-layout {
@@ -706,7 +851,7 @@ tbody tr:last-child td {
 .track {
   height: 12px;
   border-radius: 999px;
-  background: #e5e9e5;
+  background: #1f2937;
   overflow: hidden;
 }
 
@@ -777,7 +922,7 @@ tbody tr:last-child td {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fbfcf8;
+  background: var(--surface-2);
 }
 
 .mask-matrix {
@@ -793,7 +938,7 @@ tbody tr:last-child td {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  color: #fff;
+  color: #03131b;
   font-size: 11px;
   font-weight: 760;
   background: var(--leaf);
@@ -801,7 +946,7 @@ tbody tr:last-child td {
 
 .mask-cell.blocked {
   color: var(--muted);
-  background: #e5e9e5;
+  background: #1f2937;
 }
 
 .cross-matrix {
@@ -816,9 +961,9 @@ tbody tr:last-child td {
   min-height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(24, 32, 39, 0.1);
+  border: 1px solid var(--line);
   border-radius: 6px;
-  color: #122024;
+  color: var(--ink);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -905,7 +1050,7 @@ tbody tr:last-child td {
 }
 
 .curve-axis {
-  stroke: #b9c2bc;
+  stroke: #475569;
   stroke-width: 1;
 }
 
@@ -917,7 +1062,7 @@ tbody tr:last-child td {
 
 .curve-marker {
   fill: var(--teal);
-  stroke: #fff;
+  stroke: #07111f;
   stroke-width: 3;
 }
 
@@ -1021,7 +1166,8 @@ tbody tr:last-child td {
   .decoder-layout,
   .ffn-layout,
   .training-layout,
-  .position-layout {
+  .position-layout,
+  .variable-ladder {
     grid-template-columns: 1fr;
   }
 
@@ -1047,7 +1193,10 @@ tbody tr:last-child td {
 
   .flow,
   .results-grid,
-  .stat-grid {
+  .stat-grid,
+  .lesson-grid,
+  .easy-equation,
+  .pair-walkthrough {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1110,7 +1259,15 @@ tbody tr:last-child td {
   .flow,
   .results-grid,
   .stat-grid,
+  .lesson-grid,
+  .easy-equation,
+  .pair-walkthrough,
   .top-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .pair-row,
+  .ladder-row {
     grid-template-columns: 1fr;
   }
 

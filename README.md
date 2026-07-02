@@ -1,15 +1,16 @@
 # Transformer Paper Interactive
 
-A local-first interactive dashboard for learning the Transformer paper,
-"Attention Is All You Need", in paper order.
+A local-first dark-mode interactive dashboard for learning the Transformer
+paper, "Attention Is All You Need", in paper order.
 
-The app is intentionally static: open `index.html` and experiment with token
-sequences, query tokens, heads, masking, scaling, model presets, and the paper's
-training schedule numbers.
+The app starts at a 12-year-old-friendly level: count tokens, count token pairs,
+turn one score row into probabilities, then gradually raise the numbers toward
+the paper's real variables.
 
 ## Current Scope
 
-- Walk through the paper from the motivation to results.
+- Walk through the paper with a fine-grained 12-step learning map.
+- Use a dark dashboard UI designed for repeated study.
 - Edit a sentence and watch the token count, attention matrix, Q/K/V vectors,
   raw scores, scaled scores, softmax weights, and top links update.
 - Compare a small 4-head deterministic simulation while keeping the real paper
@@ -43,7 +44,7 @@ push once a private GitHub repository is available.
 
 ## Next Steps
 
-1. Add a short quiz/checkpoint mode after each paper section.
-2. Add more section-level examples from the paper tables.
+1. Add a short quiz/checkpoint mode after each tiny section.
+2. Add Korean example sentences beside the English default.
 3. Validate the simplified attention math against a small reference script.
 4. Add progress persistence for completed sections.

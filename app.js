@@ -65,12 +65,16 @@ const el = {
   maskToggle: document.querySelector("#maskToggle"),
   trainStep: document.querySelector("#trainStepInput"),
   summaryMetrics: document.querySelector("#summaryMetrics"),
+  lessonGrid: document.querySelector("#lessonGrid"),
   claimNumbers: document.querySelector("#claimNumbers"),
+  pairWalkthrough: document.querySelector("#pairWalkthrough"),
   stackDiagram: document.querySelector("#stackDiagram"),
+  variableLadder: document.querySelector("#variableLadder"),
   modelStats: document.querySelector("#modelStats"),
   positionVectors: document.querySelector("#positionVectors"),
   positionTable: document.querySelector("#positionTable"),
   attentionMatrix: document.querySelector("#attentionMatrix"),
+  easyEquation: document.querySelector("#easyEquation"),
   qkvPanel: document.querySelector("#qkvPanel"),
   scoreTable: document.querySelector("#scoreTable"),
   scaleCompare: document.querySelector("#scaleCompare"),
@@ -289,9 +293,9 @@ function renderTargetTokens() {
 
 function renderSummaryMetrics(preset) {
   const items = [
-    ["tokens", state.tokens.length],
+    ["토큰 n", state.tokens.length],
     ["d_model", preset.dModel],
-    ["heads x d_k", `${preset.heads} x ${preset.dK}`],
+    ["head x d_k", `${preset.heads} x ${preset.dK}`],
     ["EN-DE BLEU", preset.bleuDe.toFixed(1)],
   ];
 
@@ -300,13 +304,46 @@ function renderSummaryMetrics(preset) {
     .join("");
 }
 
+function renderLessonGrid(preset, data) {
+  const n = state.tokens.length;
+  const row = data.weights[state.selectedToken];
+  const best = topIndex(row);
+  const softmaxSum = row.reduce((sum, weight) => sum + weight, 0);
+  const lessons = [
+    ["0", "큰 그림", "문장을 숫자 묶음으로 바꿔 다음 단어를 더 잘 맞힌다."],
+    ["1", "토큰 세기", `지금 문장은 ${n}개 토큰이다.`],
+    ["2", "짝 만들기", `${n} x ${n} = ${n * n}개의 비교 점수를 만든다.`],
+    ["3", "위치 붙이기", `선택 토큰 위치는 ${state.selectedToken}번이다.`],
+    ["4", "질문 고르기", `"${state.tokens[state.selectedToken]}" 토큰이 query 역할을 한다.`],
+    ["5", "점수 만들기", `가장 큰 관심은 "${state.tokens[best]}" 쪽이다.`],
+    ["6", "확률로 바꾸기", `softmax 뒤 가중치 합은 ${format(softmaxSum, 2)}이다.`],
+    ["7", "값 섞기", `${n}개 value를 비율대로 섞어 새 벡터를 만든다.`],
+    ["8", "여러 head", `데모는 ${DEMO_HEADS}개, 논문 ${preset.name}은 ${preset.heads}개 head다.`],
+    ["9", "큰 변수", `d_model은 데모 ${DEMO_DIM}에서 논문 ${preset.dModel}로 커진다.`],
+    ["10", "학습", `warmup은 ${WARMUP_STEPS.toLocaleString()} step이다.`],
+    ["11", "결과", `${preset.name} EN-DE BLEU는 ${preset.bleuDe.toFixed(1)}이다.`],
+  ];
+
+  el.lessonGrid.innerHTML = lessons
+    .map(
+      ([step, title, text]) => `
+        <article class="lesson-card">
+          <span>${step}</span>
+          <strong>${title}</strong>
+          <p>${text}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function renderClaimNumbers() {
   const n = state.tokens.length;
   const cards = [
-    ["문장 길이 n", n, "현재 입력에서 만든 토큰 수"],
-    ["attention score", n * n, "query-key 모든 조합"],
-    ["가장 먼 연결", "1 layer", "self-attention의 path length"],
-    ["RNN 순차 step", n, "왼쪽에서 오른쪽으로 n번"],
+    ["토큰 수 n", n, "문장을 자른 작은 말 조각 수"],
+    ["선택 토큰 위치", state.selectedToken, "0부터 세는 자리 번호"],
+    ["데모 벡터 길이", DEMO_DIM, "한 토큰을 숫자 8개로 표현"],
+    ["논문 base 길이", 512, "실제 base는 숫자 512개"],
   ];
 
   el.claimNumbers.innerHTML = cards
@@ -320,6 +357,68 @@ function renderClaimNumbers() {
       `,
     )
     .join("");
+}
+
+function renderPairWalkthrough() {
+  const n = state.tokens.length;
+  const selected = state.tokens[state.selectedToken];
+  const preview = state.tokens.slice(0, 5);
+  const rows = preview
+    .map(
+      (token, index) => `
+        <div class="pair-row">
+          <span>query ${index}</span>
+          <strong>${escapeHTML(token)}</strong>
+          <em>${n}개 key를 본다</em>
+        </div>
+      `,
+    )
+    .join("");
+
+  el.pairWalkthrough.innerHTML = `
+    <div class="pair-sum">
+      <span>전체 비교</span>
+      <strong>${n} x ${n} = ${n * n}</strong>
+      <p>${n}개 토큰이 각각 ${n}개 토큰을 보니 ${n * n}개의 점수가 생긴다.</p>
+    </div>
+    <div class="pair-sum">
+      <span>선택 query</span>
+      <strong>${escapeHTML(selected)} -> ${n} scores</strong>
+      <p>한 줄만 보면 "${escapeHTML(selected)}"가 모든 key에게 점수를 주는 장면이다.</p>
+    </div>
+    <div class="pair-list">${rows}</div>
+  `;
+}
+
+function renderVariableLadder(preset) {
+  const rows = [
+    ["작은 데모", DEMO_DIM, DEMO_HEADS, DEMO_DIM * 4, "브라우저에서 바로 계산"],
+    ["논문 base", PAPER_PRESETS.base.dModel, PAPER_PRESETS.base.heads, PAPER_PRESETS.base.dFF, "65M parameters"],
+    ["논문 big", PAPER_PRESETS.big.dModel, PAPER_PRESETS.big.heads, PAPER_PRESETS.big.dFF, "213M parameters"],
+  ];
+
+  el.variableLadder.innerHTML = `
+    <article class="ladder-note">
+      <span>변수 레벨업</span>
+      <strong>${preset.name}</strong>
+      <p>처음에는 작은 숫자로 감각을 잡고, 뒤에서는 논문 숫자로 같은 구조를 키운다.</p>
+    </article>
+    <div class="ladder-table">
+      ${rows
+        .map(
+          ([name, dModel, heads, dFF, note]) => `
+            <div class="ladder-row">
+              <strong>${name}</strong>
+              <span>d_model ${dModel}</span>
+              <span>heads ${heads}</span>
+              <span>d_ff ${dFF}</span>
+              <em>${note}</em>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function renderStackDiagram(preset) {
@@ -358,14 +457,14 @@ function renderDefinitionList(target, rows) {
 
 function renderModelStats(preset) {
   renderDefinitionList(el.modelStats, [
-    ["layers N", preset.layers],
+    ["층 N", preset.layers],
     ["d_model", preset.dModel],
     ["d_ff", preset.dFF],
-    ["heads h", preset.heads],
+    ["head 수 h", preset.heads],
     ["d_k / d_v", `${preset.dK} / ${preset.dV}`],
-    ["parameters", `${preset.paramsM}M`],
+    ["파라미터", `${preset.paramsM}M`],
     ["dropout", preset.dropout],
-    ["train steps", preset.trainSteps.toLocaleString()],
+    ["학습 step", preset.trainSteps.toLocaleString()],
   ]);
 }
 
@@ -430,6 +529,37 @@ function renderPositionSection() {
   `;
 }
 
+function renderEasyEquation(data) {
+  const queryIndex = state.selectedToken;
+  const row = data.weights[queryIndex];
+  const best = topIndex(row);
+  const raw = data.raw[queryIndex][best];
+  const used = data.usedScores[queryIndex][best];
+  const scaleText = state.scale ? `sqrt(${DEMO_DIM}) = ${format(Math.sqrt(DEMO_DIM), 2)}로 나눔` : "스케일 나누기 꺼짐";
+  const sum = row.reduce((total, weight) => total + weight, 0);
+
+  const steps = [
+    ["1", "query", `"${state.tokens[queryIndex]}"가 질문한다`],
+    ["2", "top key", `"${state.tokens[best]}" 점수가 제일 크다`],
+    ["3", "raw score", format(raw, 3)],
+    ["4", "scale", `${scaleText} -> ${format(used, 3)}`],
+    ["5", "softmax", `${(row[best] * 100).toFixed(1)}% 관심`],
+    ["6", "합계", `모든 확률 합 ${format(sum, 2)}`],
+  ];
+
+  el.easyEquation.innerHTML = steps
+    .map(
+      ([step, title, value]) => `
+        <article class="equation-step">
+          <span>${step}</span>
+          <strong>${title}</strong>
+          <p>${value}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
 function renderMatrix(data) {
   const count = state.tokens.length;
   el.attentionMatrix.style.gridTemplateColumns = `repeat(${count}, minmax(42px, 1fr))`;
@@ -468,7 +598,7 @@ function renderQKV(data, preset) {
 
   el.qkvPanel.innerHTML = `
     <span class="vector-title">Head ${state.selectedHead + 1} projection</span>
-    <p>논문 ${preset.name}: W_Q, W_K, W_V는 각 head에서 d_model=${preset.dModel}을 d_k=${preset.dK}, d_v=${preset.dV}로 투영한다.</p>
+    <p>작은 데모는 숫자 ${DEMO_DIM}개로 본다. 논문 ${preset.name}은 d_model=${preset.dModel}에서 head마다 d_k=${preset.dK}, d_v=${preset.dV}로 나눠 본다.</p>
   `;
   el.qkvPanel.append(stack);
 }
@@ -484,7 +614,7 @@ function renderScoreTable(data) {
       const weight = data.weights[queryIndex][keyIndex];
       const isTop = keyIndex === topIndex(data.weights[queryIndex]);
       return `
-        <tr${isTop ? ' style="background:#f0f6f4"' : ""}>
+        <tr${isTop ? ' style="background:rgba(34, 211, 238, 0.12)"' : ""}>
           <td>${escapeHTML(token)}</td>
           <td>${format(raw, 3)}</td>
           <td>${format(used, 3)}</td>
@@ -531,7 +661,7 @@ function renderScaleCompare() {
 
   el.scaleCompare.innerHTML = `
     <span class="table-caption">sqrt(d_k) scaling effect</span>
-    <p>논문 base의 d_k=64라서 실제 분모는 sqrt(64)=8이다. 데모는 d_k=${DEMO_DIM}, sqrt(d_k)=${format(Math.sqrt(DEMO_DIM), 2)}를 쓴다.</p>
+    <p>숫자가 너무 커지면 softmax가 한 칸에만 몰린다. 그래서 논문 base는 sqrt(64)=8로 나누고, 이 데모는 sqrt(${DEMO_DIM})=${format(Math.sqrt(DEMO_DIM), 2)}로 나눈다.</p>
     <div class="scale-bars">${body}</div>
   `;
 }
@@ -549,7 +679,7 @@ function renderHeads() {
     card.innerHTML = `
       <h3>Head ${head + 1}</h3>
       <div class="head-meta">
-        <span>top: ${escapeHTML(state.tokens[best])}</span>
+        <span>1등 key: ${escapeHTML(state.tokens[best])}</span>
         <span>entropy ${format(entropy(row), 2)}</span>
       </div>
     `;
@@ -563,7 +693,7 @@ function renderHeads() {
       spark.className = "spark";
       weights.forEach((weight, keyIndex) => {
         const block = document.createElement("span");
-        block.style.background = state.mask && keyIndex > queryIndex ? "#e5e9e5" : heatColor(weight, head);
+        block.style.background = state.mask && keyIndex > queryIndex ? "#1f2937" : heatColor(weight, head);
         spark.append(block);
       });
       sparkRow.append(token, spark);
@@ -598,9 +728,9 @@ function renderMaskSection() {
   const blockedCount = count - allowedCount;
   el.decoderNotes.innerHTML = `
     <strong>target query: ${escapeHTML(state.targetTokens[state.selectedTarget])}</strong>
-    <p>Masked self-attention allows ${allowedCount} target key(s) and blocks ${blockedCount} future key(s).</p>
-    <p>Cross-attention then uses this target-side query to read every encoder source token.</p>
-    <p>Global mask toggle: <strong>${state.mask ? "on" : "off"}</strong></p>
+    <p>masked self-attention은 target key ${allowedCount}개만 보고, 미래 key ${blockedCount}개는 막는다.</p>
+    <p>그 다음 cross-attention은 target query로 source 토큰 전체를 다시 읽는다.</p>
+    <p>전체 마스크 토글: <strong>${state.mask ? "on" : "off"}</strong></p>
   `;
 }
 
@@ -635,20 +765,20 @@ function renderCrossAttention(data) {
     .join("");
 
   el.crossOutput.innerHTML = `
-    <p><strong>${escapeHTML(state.targetTokens[state.selectedTarget])}</strong> reads source token <strong>${escapeHTML(
+    <p><strong>${escapeHTML(state.targetTokens[state.selectedTarget])}</strong>가 source 토큰 <strong>${escapeHTML(
       state.tokens[best],
-    )}</strong> most strongly.</p>
+    )}</strong>를 가장 크게 본다.</p>
     <p>${ranked}</p>
   `;
 }
 
 function renderFlow(preset) {
   const steps = [
-    ["Embedding + PE", `token vector와 position vector를 더해 d_model=${preset.dModel} 표현을 만든다.`],
-    ["Multi-head", `${preset.heads} heads x d_k=${preset.dK}. 각 head가 다른 관계를 본다.`],
-    ["Add + Norm", "Sublayer(x)를 원래 x에 더한 뒤 layer normalization을 적용한다."],
-    ["FFN", `${preset.dModel} -> ${preset.dFF} -> ${preset.dModel}. 모든 위치에 같은 MLP를 적용한다.`],
-    ["Add + Norm", "다음 layer로 넘기기 전에 residual 경로를 다시 정규화한다."],
+    ["1. 숫자 붙이기", `토큰 숫자와 위치 숫자를 더해 길이 ${preset.dModel} 표현을 만든다.`],
+    ["2. 여러 head", `${preset.heads}개 head가 서로 다른 기준으로 토큰을 본다.`],
+    ["3. 다시 더하기", "새로 계산한 값과 원래 값을 더해 중요한 정보를 잃지 않는다."],
+    ["4. FFN", `${preset.dModel} -> ${preset.dFF} -> ${preset.dModel}로 키웠다가 줄인다.`],
+    ["5. 정리", "값의 평균과 크기를 정리해 다음 층이 쓰기 좋게 만든다."],
   ];
 
   el.encoderFlow.innerHTML = steps
@@ -727,13 +857,13 @@ function renderLearningRate(preset) {
   `;
 
   renderDefinitionList(el.trainingStats, [
-    ["selected step", step.toLocaleString()],
-    ["learning rate", formatLR(learningRate(step, preset.dModel))],
+    ["선택 step", step.toLocaleString()],
+    ["학습률", formatLR(learningRate(step, preset.dModel))],
     ["warmup", WARMUP_STEPS.toLocaleString()],
     ["optimizer", "Adam 0.9 / 0.98 / 1e-9"],
-    ["batch tokens", "25K src + 25K tgt"],
-    ["step time", `${preset.stepTime}s`],
-    ["total", preset.trainTime],
+    ["batch token", "25K src + 25K tgt"],
+    ["1 step 시간", `${preset.stepTime}s`],
+    ["전체 시간", preset.trainTime],
   ]);
 }
 
@@ -769,10 +899,10 @@ function renderInspector(data) {
   renderDefinitionList(el.metrics, [
     ["query", escapeHTML(state.tokens[state.selectedToken])],
     ["head", `H${state.selectedHead + 1}`],
-    ["top key", escapeHTML(state.tokens[best])],
-    ["max weight", `${(row[best] * 100).toFixed(1)}%`],
+    ["1등 key", escapeHTML(state.tokens[best])],
+    ["가장 큰 비율", `${(row[best] * 100).toFixed(1)}%`],
     ["raw dot", format(raw[best], 3)],
-    ["used score", format(used[best], 3)],
+    ["사용 점수", format(used[best], 3)],
     ["entropy", `${format(entropy(row), 2)} bits`],
   ]);
 
@@ -802,10 +932,14 @@ function render() {
   renderTokens();
   renderTargetTokens();
   renderSummaryMetrics(preset);
+  renderLessonGrid(preset, data);
   renderClaimNumbers();
+  renderPairWalkthrough();
   renderStackDiagram(preset);
+  renderVariableLadder(preset);
   renderModelStats(preset);
   renderPositionSection();
+  renderEasyEquation(data);
   renderMatrix(data);
   renderQKV(data, preset);
   renderScoreTable(data);
